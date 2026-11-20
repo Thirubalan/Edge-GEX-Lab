@@ -1,6 +1,3 @@
-line1
-    indented
-line3
 """Login gate for the Vercel deploy of Edge GEX Lab (pure ASGI, no extra dependencies).
 
 Every request needs a signed session cookie except /login and /logout.
