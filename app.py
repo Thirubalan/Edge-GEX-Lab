@@ -3,7 +3,9 @@
 Added for the Vercel deploy only; upstream files are left untouched.
 - Vercel's filesystem is read-only except /tmp, so the data/ paths move there.
 - Upstream only accepts 127.0.0.1/localhost as Host; this also allows the Vercel domains.
-Alpaca keys come from Vercel Environment Variables (APCA_API_KEY_ID, APCA_API_SECRET_KEY).
+- A login page (login_gate.py) protects the whole app.
+Secrets come from Vercel Environment Variables: APCA_API_KEY_ID, APCA_API_SECRET_KEY,
+GEXLAB_LOGIN_USER, GEXLAB_LOGIN_PASSWORD.
 """
 import os
 from pathlib import Path
@@ -34,5 +36,8 @@ for _var in ("VERCEL_URL", "VERCEL_BRANCH_URL", "VERCEL_PROJECT_PRODUCTION_URL")
         _hosts.append(os.environ[_var])
 _hosts += [h.strip() for h in os.getenv("GEXLAB_ALLOWED_HOSTS", "").split(",") if h.strip()]
 
+from login_gate import LoginGate  # noqa: E402
+
 app.user_middleware = [m for m in app.user_middleware if m.cls is not TrustedHostMiddleware]
+app.add_middleware(LoginGate)  # login required for every page, API call and static file
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=_hosts, www_redirect=False)
