@@ -4,6 +4,7 @@ Added for the Vercel deploy only; upstream files are left untouched.
 - Vercel's filesystem is read-only except /tmp, so the data/ paths move there.
 - Upstream only accepts 127.0.0.1/localhost as Host; this also allows the Vercel domains.
 - A login page (login_gate.py) protects the whole app.
+- SPX comes from Alpaca options (alpaca_index.py) because Cboe blocks Vercel's servers.
 Secrets come from Vercel Environment Variables: APCA_API_KEY_ID, APCA_API_SECRET_KEY,
 GEXLAB_LOGIN_USER, GEXLAB_LOGIN_PASSWORD.
 """
@@ -25,6 +26,12 @@ config.CALENDAR_DISK_CACHE = _DATA / "cache" / "calendar_alpaca.json"
 config.RATE_DB = _DATA / "ratelimit.sqlite"
 config.ADV_CACHE_FILE = _DATA / "cache" / "adv_daily.json"
 config.ATR_CACHE_FILE = _DATA / "cache" / "atr_daily.json"
+# Cboe answers HTTP 403 to Vercel, so open interest for SPY/QQQ/stocks comes from Alpaca too.
+config.OI_SOURCE = os.getenv("GEXLAB_OI_SOURCE", "alpaca")
+
+import alpaca_index  # noqa: E402
+
+alpaca_index.install()   # SPX (GEXLAB_ALPACA_INDEX) served from Alpaca options instead of Cboe
 
 from starlette.middleware.trustedhost import TrustedHostMiddleware  # noqa: E402
 
